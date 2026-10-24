@@ -1,1 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simple, responsive personal expense tracker to record and review your spending." />
+  <title>SpendWise | Personal Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="SpendWise home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>Spend<span class="brand-light">Wise</span></span>
+      </a>
+
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-item active" href="#dashboard"><span class="nav-icon">▦</span> Dashboard</a>
+        <a class="nav-item" href="#transactions"><span class="nav-icon">↕</span> Transactions</a>
+        <a class="nav-item" href="#insights"><span class="nav-icon">◔</span> Spending insights</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="tip-card">
+          <div class="tip-icon">✦</div>
+          <p class="tip-title">Small steps add up.</p>
+          <p class="tip-copy">Track your spending to understand your habits and make informed choices.</p>
+        </div>
+        <p class="sidebar-note">Personal project · Version 1.0</p>
+      </div>
+    </aside>
+
+    <main class="main-content" id="dashboard">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">YOUR MONEY, MADE CLEAR</p>
+          <h1>Expense overview</h1>
+          <p class="page-subtitle">A simple view of where your money goes.</p>
+        </div>
+        <div class="topbar-actions">
+          <label class="month-picker">
+            <span class="sr-only">Select month</span>
+            <input type="month" id="monthFilter" />
+          </label>
+          <button class="button button-primary" id="openExpenseModal" type="button"><span aria-hidden="true">＋</span> Add expense</button>
+        </div>
+      </header>
+
+      <section class="summary-grid" aria-label="Expense summary">
+        <article class="summary-card summary-dark">
+          <div class="summary-card-top">
+            <span class="summary-label">Total spent</span>
+            <span class="summary-symbol">↗</span>
+          </div>
+          <p class="summary-value" id="totalSpent">₹0.00</p>
+          <p class="summary-foot" id="totalSpentCaption">For the selected month</p>
+        </article>
+        <article class="summary-card">
+          <div class="summary-card-top">
+            <span class="summary-label">Transactions</span>
+            <span class="summary-symbol symbol-soft">↕</span>
+          </div>
+          <p class="summary-value" id="transactionCount">0</p>
+          <p class="summary-foot">Recorded expenses this month</p>
+        </article>
+        <article class="summary-card">
+          <div class="summary-card-top">
+            <span class="summary-label">Largest expense</span>
+            <span class="summary-symbol symbol-soft">◎</span>
+          </div>
+          <p class="summary-value" id="largestExpense">₹0.00</p>
+          <p class="summary-foot" id="largestExpenseCaption">No expenses yet</p>
+        </article>
+      </section>
+
+      <section class="content-grid" id="insights">
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Spending by category</h2>
+              <p class="panel-subtitle">See which categories use the most money.</p>
+            </div>
+            <span class="panel-badge">This month</span>
+          </div>
+          <div class="chart-wrap" id="chartWrap">
+            <canvas id="categoryChart" aria-label="Doughnut chart of expenses by category" role="img"></canvas>
+            <div class="chart-empty" id="chartEmpty">
+              <span class="empty-chart-icon">◔</span>
+              <p>No category data yet</p>
+              <span>Add an expense to see your breakdown.</span>
+            </div>
+          </div>
+          <div class="category-legend" id="categoryLegend"></div>
+        </article>
+
+        <article class="panel quick-add-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Quick add</h2>
+              <p class="panel-subtitle">Record a purchase in seconds.</p>
+            </div>
+            <span class="quick-icon">＋</span>
+          </div>
+          <form id="quickExpenseForm" class="expense-form">
+            <div class="field">
+              <label for="quickTitle">Expense name</label>
+              <input id="quickTitle" name="title" type="text" maxlength="60" placeholder="e.g. Lunch" required />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="quickAmount">Amount (₹)</label>
+                <input id="quickAmount" name="amount" type="number" min="0.01" max="100000000" step="0.01" placeholder="250.00" required />
+              </div>
+              <div class="field">
+                <label for="quickCategory">Category</label>
+                <select id="quickCategory" name="category" required>
+                  <option value="Food">Food</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Bills">Bills</option>
+                  <option value="Health">Health</option>
+                  <option value="Education">Education</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="quickDate">Date</label>
+              <input id="quickDate" name="date" type="date" required />
+            </div>
+            <button class="button button-primary button-full" type="submit">Save expense <span aria-hidden="true">→</span></button>
+            <p class="form-note">Your records stay in this browser on this device.</p>
+          </form>
+        </article>
+      </section>
+
+      <section class="panel transactions-panel" id="transactions">
+        <div class="panel-heading transactions-heading">
+          <div>
+            <h2>Recent transactions</h2>
+            <p class="panel-subtitle">Review, search, or update your expense records.</p>
+          </div>
+          <div class="transaction-tools">
+            <label class="search-box">
+              <span aria-hidden="true">⌕</span>
+              <span class="sr-only">Search expenses</span>
+              <input id="searchInput" type="search" placeholder="Search expenses..." />
+            </label>
+            <select id="categoryFilter" aria-label="Filter by category" class="filter-select">
+              <option value="All">All categories</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Other">Other</option>
+            </select>
+            <button class="button button-secondary" id="exportCsv" type="button">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Expense</th>
+                <th scope="col">Category</th>
+                <th scope="col">Date</th>
+                <th scope="col" class="align-right">Amount</th>
+                <th scope="col" class="align-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState">
+            <div class="empty-state-icon">↗</div>
+            <h3>No expenses found</h3>
+            <p>Add your first expense or adjust your search filters.</p>
+            <button class="button button-secondary" id="emptyAddButton" type="button">Add your first expense</button>
+          </div>
+        </div>
+        <div class="table-footer">
+          <span id="tableCount">Showing 0 transactions</span>
+          <button class="text-button" id="clearFilters" type="button">Clear filters</button>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <span>SpendWise · Personal Expense Tracker</span>
+        <span>Built for learning and everyday budgeting</span>
+      </footer>
+    </main>
+  </div>
+
+  <dialog class="modal" id="expenseModal" aria-labelledby="modalTitle">
+    <form id="expenseForm" class="modal-card">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">TRANSACTION DETAILS</p>
+          <h2 id="modalTitle">Add an expense</h2>
+        </div>
+        <button class="icon-button" type="button" id="closeExpenseModal" aria-label="Close dialog">×</button>
+      </div>
+      <input type="hidden" id="expenseId" />
+      <div class="field">
+        <label for="expenseTitle">Expense name</label>
+        <input id="expenseTitle" name="title" type="text" maxlength="60" placeholder="e.g. Groceries" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="expenseAmount">Amount (₹)</label>
+          <input id="expenseAmount" name="amount" type="number" min="0.01" max="100000000" step="0.01" placeholder="0.00" required />
+        </div>
+        <div class="field">
+          <label for="expenseCategory">Category</label>
+          <select id="expenseCategory" name="category" required>
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="expenseDate">Date</label>
+        <input id="expenseDate" name="date" type="date" required />
+      </div>
+      <div class="field">
+        <label for="expenseNote">Note <span class="optional-label">Optional</span></label>
+        <textarea id="expenseNote" name="note" rows="3" maxlength="180" placeholder="Add a short note..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="button button-secondary" type="button" id="cancelExpense">Cancel</button>
+        <button class="button button-primary" type="submit" id="saveExpenseButton">Save expense</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
 
